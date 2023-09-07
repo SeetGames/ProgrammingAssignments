@@ -11,7 +11,7 @@ m_exitFlag(false),
 m_exitCode(0)
 {
     m_internalCmdList["echo"] = &uShell::echo;
-    m_internalCmdList["setVar"] = &uShell::setVar;
+    m_internalCmdList["setvar"] = &uShell::setVar;
     m_vars["PATH"] = ""; // Initialize PATH variable or set to a default value
 }
 
@@ -68,6 +68,7 @@ bool uShell::replaceVars(TokenList& _tokenList) const
             try 
             {
                 token.replace(startPos, endPos - startPos + 1, m_vars.at(varName));
+                //std::cout << "DEBUG: Replaced variable [" << varName << "] with [" << m_vars.at(varName) << "]" << std::endl;
             } 
             catch (const std::out_of_range&) 
             {
@@ -110,8 +111,6 @@ std::string uShell::mergeTokens(TokenList const& _tokenList, unsigned _startPos)
             oss << " ";
         }
     }
-    std::string merged = mergeTokens(_tokenList, 0);
-    std::cout << "Merged tokens: [" << merged << "]" << std::endl;
     return oss.str();
 }
 
@@ -130,16 +129,21 @@ void uShell::echo(TokenList const& _tokenList)
 
 void uShell::setVar(TokenList const& _tokenList)
 {
+    //std::cout << "DEBUG: Inside setVar function" << std::endl;
     if (_tokenList.size() < 2)
     {
         std::cerr << "Error: Invalid setVar command." << std::endl;
         return;
     }
+
     std::string varName = _tokenList[1];
+    //std::cout << "DEBUG: varName = " << varName << std::endl;
     std::string value = (_tokenList.size() > 2) ? mergeTokens(_tokenList, 2) : "";
+    //std::cout << "DEBUG: value = " << value << std::endl;
     if (isValidVarname(varName.c_str(), varName.c_str() + varName.size()))
     {
         m_vars[varName] = value;
+        //std::cout << "DEBUG: Set variable " << varName << " to value " << value << std::endl;
     }
     else
     {
@@ -164,12 +168,14 @@ int uShell::run()
             if (tokens.empty())
                 continue;
             if (m_internalCmdList.find(tokens[0]) != m_internalCmdList.end())
+            {
+                //std::cout << "DEBUG: Executing internal command [" << tokens[0] << "]" << std::endl;
                 (this->*m_internalCmdList[tokens[0]])(tokens);
+            }
             else
             {
                 // External command handling can be added here
             }
-
             // Check if the first token is the "exit" command
             if (tokens[0] == "exit")
             {
@@ -178,7 +184,6 @@ int uShell::run()
                     std::cerr << "Error: Too many arguments for exit command." << std::endl;
                     continue;
                 }
-
                 if (tokens.size() == 2)
                 {
                     try
@@ -195,7 +200,6 @@ int uShell::run()
                 {
                     m_exitCode = 0;  // Default exit value
                 }
-
                 m_exitFlag = true;  // Set the flag to terminate the loop
                 break;  // Exit the loop immediately
             }
