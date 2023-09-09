@@ -1,0 +1,6 @@
+echo                                                                                                                                                                                  echo at by      change
+setvar TTH2 hasd
+echo ${TTH2}
+setvar PTH2
+echo ${PTH2}123
+echo helloworld # So the replacement only happen once 

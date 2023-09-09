@@ -26,7 +26,7 @@ protected:
     //decide whether to echo user input
     bool m_verbose;
     //determine whether to exit
-    bool m_exitFlag;
+    bool m_exit;
     //exit code determined during runtime
     int m_exitCode;
     /************************************************************************/

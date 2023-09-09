@@ -1,0 +1,29 @@
+setvar HAHA hoohoo # assign the value hoohoo to HAHA
+echo ${HAHA} # calling out the value of HAHA hoohoo
+# hoohoo is printed on the screen.
+setvar haha # variable haha is defined and given a default value.
+echo ${Haha}123 # Attempting to call out the value of an undefined variable.
+echo ${HAHA}123 # disambiguate the beginning and end of the var name
+echo ${HAHA }123 # wrong use of curly braces. Would be read as 2 separate words.
+echo $${HAHA} # $ sign can be used together with variables
+echo ${${HAHA}} # nested use of curly braces are not supported
+# So the replacement only happen once.
+echo 
+echo        
+echo 	 	 w 	w
+echo 1 	 2 		 	 	2
+echo     mfm    e    efe f ff
+setvar ${HAHA#} lolol
+echo ${oof}
+   echo echo   
+echo echo
+setvar HAHA$ test
+setvar $H$H ttt
+setvar LOL lwwo ow oo wow oo j nwndn# enmfen # eee
+echo ${${${${${${${HAHA}}}}}}}lollaaaa
+echo efjeifneifnfieifi${LOL} ${eef}wwwwwwww w w w w 
+echo wwhwhwhwhwh${LOL}
+setvar empty
+setvar empt 
+echo aaa${empty}wwddw
+echo adaf${empt}fwef

@@ -1,0 +1,9 @@
+uShell>echo                                                                                                                                                                                  echo at by      change
+echo at by change
+uShell>setvar TTH2 hasd
+uShell>echo ${TTH2}
+hasd
+uShell>setvar PTH2
+uShell>echo ${PTH2}123
+123
+uShell>Exiting with code: 0

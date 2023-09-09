@@ -18,6 +18,6 @@ int main(int argc, char* argv[])
     uShell shell(verboseMode);
     int exitCode = shell.run();
 
-    std::cout << "Exiting with code: " << exitCode << std::endl;
+    //std::cout << "Exiting with code: " << exitCode << std::endl;
     return exitCode;
 }
