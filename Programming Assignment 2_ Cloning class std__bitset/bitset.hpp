@@ -1,5 +1,14 @@
-// File documentation header is required
-// This file contains the implementation of the bitset class template.
+/*!*****************************************************************************
+ \file bitset.hpp
+ \author Seetoh Wei Tung
+ \par DP email: seetoh.w@digipen.edu
+ \par Course:  Modern C++ Design Patterns
+ \par Section: B
+ \par Assignment 2
+ \date 14-09-2023
+ \brief
+    This file contains the implementation of the bitset class template.
+*******************************************************************************/
 
 namespace HLP3
 {
@@ -13,6 +22,14 @@ namespace HLP3
     bitset<N>::bitset()
     {
         // Calculate the number of bytes needed to store N bits
+        /*The expression (N + CHAR_BIT - 1) is a common trick to round up 
+        the division. Without the addition of CHAR_BIT - 1, if N is not a 
+        multiple of CHAR_BIT, you would get a truncated result. By adding 
+        CHAR_BIT - 1, you ensure that any value of N that is not a perfect 
+        multiple of CHAR_BIT will round up to the next whole byte.
+        
+        The division by CHAR_BIT then gives the number of bytes needed to 
+        store N bits.*/
         std::size_t numBytes = (N + CHAR_BIT - 1) / CHAR_BIT;
         data = new unsigned char[numBytes](); // Allocate and initialize to 0
     }
@@ -45,7 +62,23 @@ namespace HLP3
         }
         std::size_t byteIndex = pos / CHAR_BIT;
         std::size_t bitIndex = pos % CHAR_BIT;
-        return (data[byteIndex] & (1 << bitIndex)) != 0;
+
+        // Access the byte that contains the bit we're interested in.
+        unsigned char targetByte = data[byteIndex];
+
+        // Create a mask where only the desired bit is set to 1.
+        // All other bits in the mask will be 0.
+        unsigned char bitMask = (1 << bitIndex);
+
+        // Use bitwise AND to check if the desired bit in targetByte is set.
+        // If the bit is set, the result will be non-zero (i.e., the mask value).
+        // If the bit is not set, the result will be 0.
+        unsigned char result = targetByte & mask;
+        
+        // Check if the result is non-zero (i.e., the bit was set).
+        bool isBitSet = result != 0;
+
+        return isBitSet;
     }
     
     /**
@@ -64,13 +97,20 @@ namespace HLP3
         }
         std::size_t byteIndex = pos / CHAR_BIT;
         std::size_t bitIndex = pos % CHAR_BIT;
+
+        // Access the byte that contains the bit we're interested in.
+        unsigned char targetByte = data[byteIndex];
+
+        // Create a mask where only the desired bit is set to 1.
+        // All other bits in the mask will be 0.
+        unsigned char bitMask = (1 << bitIndex);
         if (value)
         {
-            data[byteIndex] |= (1 << bitIndex); // Set the bit
+            targetByte |= bitMask; // Set the bit
         }
         else
         {
-            data[byteIndex] &= ~(1 << bitIndex); // Clear the bit
+            targetByte &= ~bitMask; // Clear the bit
         }
     }
 

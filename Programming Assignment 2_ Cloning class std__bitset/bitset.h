@@ -1,5 +1,14 @@
-// File documentation header is required
-// This file contains the declaration of the bitset class template, which is a clone of the std::bitset class.
+/*!*****************************************************************************
+ \file bitset.hpp
+ \author Seetoh Wei Tung
+ \par DP email: seetoh.w@digipen.edu
+ \par Course:  Modern C++ Design Patterns
+ \par Section: B
+ \par Assignment 2
+ \date 14-09-2023
+ \brief
+    This file contains the declaration of the bitset class template, which is a clone of the std::bitset class.
+*******************************************************************************/
 
 #ifndef BITSET_H
 #define BITSET_H
