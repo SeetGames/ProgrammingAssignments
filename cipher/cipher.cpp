@@ -148,13 +148,17 @@ void decode(char const *ciphertext, int32_t num_chars, char *plaintext)
 // assume all lower case input a-z (no spaces)
 void encode(char const * plaintext, char* encryptedtext, int32_t *num_bits_used ) 
 {
+  // Initialize the bit position to 0
   int32_t bit_position{};
+  // Loop through each character in the plaintext string
   for(int32_t i{}; plaintext[i] != 0; ++i ) 
   {
+    // Calculate the value of the character by subtracting 'a' (assuming lowercase input)
     char char_value = plaintext[i] - 'a';
-    int32_t group_index{};
-    int32_t index{};
+    int32_t group_index{}; // Initialize the group index
+    int32_t index{};       // Initialize the index within the group
 
+    // Determine the group and index for the current character
     if (char_value <= 1) 
     {
       group_index = 0;
@@ -179,17 +183,18 @@ void encode(char const * plaintext, char* encryptedtext, int32_t *num_bits_used 
     // write 2 bits for group (00,01,10,11)
     int32_t group_bit_1 = (group_index & 1) << (bit_position % 8);
     int32_t group_bit_2 = ((group_index & 2) >> 1) << ((bit_position + 1) % 8);
-    encryptedtext[bit_position / 8] |= group_bit_1;
-    encryptedtext[(bit_position + 1) / 8] |= group_bit_2;
-    bit_position += 2;
+    encryptedtext[bit_position / 8] |= group_bit_1; // Set the corresponding bit in the encrypted text
+    encryptedtext[(bit_position + 1) / 8] |= group_bit_2; // Set the corresponding bit in the encrypted text
+    bit_position += 2; // Increment the bit position by 2
 
-    // write index bits
+    // write index bits for the group
     for(int32_t j{}; j < group_index+1; ++j ) 
     {
-      encryptedtext[bit_position/8] |= (index & 1) << (bit_position%8);
-      index >>= 1;
-      ++bit_position;
+      encryptedtext[bit_position/8] |= (index & 1) << (bit_position%8); // Set the corresponding bit in the encrypted text
+      index >>= 1; // Right-shift the index to handle the next bit
+      ++bit_position; // Move to the next bit position
     }
   }
+  // Store the total number of bits used in the provided num_bits_used variable
   *num_bits_used = bit_position;
 }
