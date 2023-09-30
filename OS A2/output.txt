@@ -1,0 +1,4 @@
+uShell>uShell>$222$asd asd mmmmmmmm nnnn nnn vvv ccccc dd#aaaaa# bbbb# fff#eeee#sas echo lkj dmmmmmmmm nnnn nnn vvv ccccc dd#aaaaa# bbbb# fff#eeee#mmmmmmmm nnnn nnn vvv ccccc dd#aaaaa# bbbb# fff#eeee#sas echo lkjc#sdkc#kas
+uShell>Error: ls cannot be found
+uShell>Error: ls cannot be found
+uShell>

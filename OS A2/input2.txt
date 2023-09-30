@@ -1,0 +1,30 @@
+ldd    --version
+
+gcc --version    # version ${TWO}
+
+/usr/bin/g++ --version
+
+usr/bin/gcc --version
+
+/usr/bin/gcc++  
+
+gcc++ --version
+
+changeprompt mySh
+changeprompt mySh Hello
+changeprompt my_Sh Hello   World
+changeprompt Hello World # Say Hi
+changeprompt # Say H
+
+ls -al *.txt
+exit
+
+ls  -a 
+exit 3
+
+
+setvar PATH asd
+echo $222$asd ${PATH} mmmmmmmm nnnn nnn vvv ccccc dd#aaaaa# bbbb#   fff#eeee#sas echo lkj dmmmmmmmm nnnn nnn vvv ccccc dd#aaaaa# bbbb#   fff#eeee#mmmmmmmm nnnn nnn vvv ccccc dd#aaaaa# bbbb#   fff#eeee#sas echo lkjc#sdkc#kas
+ls 
+   ls  -a vpl*
+exit

@@ -1,0 +1,5 @@
+setvar PATH asd
+echo $222$asd ${PATH} mmmmmmmm nnnn nnn vvv ccccc dd#aaaaa# bbbb#   fff#eeee#sas echo lkj dmmmmmmmm nnnn nnn vvv ccccc dd#aaaaa# bbbb#   fff#eeee#mmmmmmmm nnnn nnn vvv ccccc dd#aaaaa# bbbb#   fff#eeee#sas echo lkjc#sdkc#kas
+ls 
+   ls  -a vpl*
+exit
