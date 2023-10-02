@@ -1,0 +1,27 @@
+#please split into test cases 
+finish
+
+grep uShell uShell.h & 
+
+grep uShell uShell.h & 
+finish 0
+finish 0
+
+grep uShell uShell.h &
+finish 1
+finish 0
+finish 2
+grep uShell uShell.h&
+finish 0
+
+ls | sort
+
+ls | grep uShell
+
+ls | grep uShell | wc
+
+ls | grepsas uShell | wc
+
+ls | grep uShell | wc
+ls | | wc 
+exit
