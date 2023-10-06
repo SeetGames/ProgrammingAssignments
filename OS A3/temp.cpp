@@ -443,3 +443,346 @@ int uShell3::run()
 //     uShell3(bool _bFlag);
 //     int run();
 // };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#include <iostream>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <signal.h>
+#include <sstream>
+#include "uShell3.h"
+
+uShell3::ProcessInfo::ProcessInfo()
+{
+    PID = 0;
+    bActive = false;
+}
+
+uShell3::ProcessInfo::ProcessInfo(int _id, bool _state)
+{
+    PID = _id;
+    bActive = _state;
+}
+
+bool uShell3::exist(const TokenList &_tokenList, unsigned _start, unsigned _end)
+{
+    // Ensure the bounds are valid
+    if(_start >= _tokenList.size() || _end >= _tokenList.size())
+        return false;
+
+    std::string command = _tokenList[_start];
+
+    // If it has a '/', it's treated as a path (either relative or absolute)
+    if(command.find('/') != std::string::npos)
+    {
+        struct stat buffer;
+        return (stat(command.c_str(), &buffer) == 0);
+    }
+    else
+    {
+        const char* path = getenv("PATH");
+        if(!path)
+            return false;
+
+        // Split the PATH variable based on ':' delimiter
+        std::string pathStr(path);
+        std::istringstream ss(pathStr);
+        std::string token;
+
+        while(std::getline(ss, token, ':'))
+        {
+            std::string fullPath = token + "/" + command;
+
+            struct stat buffer;
+            if(stat(fullPath.c_str(), &buffer) == 0)
+                return true; // Command exists in this directory
+        }
+    }
+    return false;
+}
+
+// Signal handler for SIGCHLD to prevent zombie processes
+void sigchld_handler(int signo) 
+{
+    (void)signo; // suppress unused parameter warning
+    while (waitpid(-1, NULL, WNOHANG) > 0);
+}
+
+void uShell3::doExternalCmd(const TokenList &_tokenList)
+{
+    // Signal handling for background processes
+    struct sigaction sa;
+    sa.sa_handler = sigchld_handler;
+    sa.sa_flags = SA_RESTART | SA_NOCLDSTOP;
+    sigaction(SIGCHLD, &sa, nullptr);
+
+    TokenList mutableTokens = _tokenList;  // Create a copy
+    // 1. Check if the first token is a pipe
+    if (mutableTokens[0] == "|")
+    {
+        std::cerr << "Syntax Error: Unexpected pipe at the start." << std::endl;
+        return;
+    }
+
+    // 2. Count pipes and gather pipe information
+    std::vector<PipeInfo> pipes;
+    for (unsigned i = 0; i < mutableTokens.size(); i++)
+    {
+        if (mutableTokens[i] == "|")
+        {
+            PipeInfo pinfo;
+            pinfo.posInToken = i;
+            if (pipe(pinfo.descriptor) == -1)
+            {
+                perror("pipe");
+                return;
+            }
+            pipes.push_back(pinfo);
+        }
+    }
+
+    // 3. Parse commands and arguments
+    unsigned start = 0;
+    for (unsigned i = 0; i <= pipes.size(); i++)
+    {
+        unsigned end = (i < pipes.size()) ? pipes[i].posInToken : mutableTokens.size();
+
+        if (start == end)
+        {
+            std::cerr << "Syntax Error: Empty command between pipes." << std::endl;
+            return;
+        }
+
+        // Check if command exists
+        if (!exist(mutableTokens, start, end - 1))
+        {
+            std::cerr << "Command not found." << std::endl;
+            return;
+        }
+
+         // Check if the last token is "&" for background execution
+        bool runInBackground = false;
+        
+        if (!mutableTokens.empty() && mutableTokens.back() == "&")
+        {
+            runInBackground = true;
+            mutableTokens.pop_back();
+        }
+
+        // 4. Start creating child processes
+        pid_t pid = fork();
+        if (pid == -1)
+        {
+            perror("fork");
+            return;
+        }
+
+        if (pid == 0)
+        { // Child process
+            // 5. Setup pipes for IPC
+
+            // If not the first command, set up input from previous pipe
+            if (i > 0)
+            {
+                dup2(pipes[i - 1].descriptor[PipeInfo::IN_DESCRIPTOR], STDIN_FILENO);
+            }
+
+            // If not the last command, set up output to next pipe
+            if (i < pipes.size())
+            {
+                dup2(pipes[i].descriptor[PipeInfo::OUT_DESCRIPTOR], STDOUT_FILENO);
+            }
+
+            // Close all pipes in the child
+            for (const auto &p : pipes)
+            {
+                close(p.descriptor[PipeInfo::IN_DESCRIPTOR]);
+                close(p.descriptor[PipeInfo::OUT_DESCRIPTOR]);
+            }
+
+            execute(mutableTokens, start, mutableTokens.size());
+        }
+        else
+        { // Parent process
+            if (runInBackground) 
+            {
+                // If background process, store it in list
+                m_bgProcessList.push_back(ProcessInfo(pid, true));
+                std::cout << "[" << m_bgProcessList.size() - 1 << "] process " << pid << std::endl;
+            }
+            else 
+            {
+                // If not a background process, just wait for it
+                int status;
+                waitpid(pid, &status, 0);
+            }
+        }
+
+        start = end + 1; // Move to the next command
+    }
+
+    // 8. Close all pipes in the parent and wait for child processes
+    for (const auto &p : pipes)
+    {
+        close(p.descriptor[PipeInfo::IN_DESCRIPTOR]);
+        close(p.descriptor[PipeInfo::OUT_DESCRIPTOR]);
+    }
+
+    // Concurrency in waiting for children
+    int status;
+    while (true)
+    {
+        pid_t done = waitpid(-1, &status, WNOHANG);
+        if (done == 0)
+        {
+            break; // no child has exited yet, but they're still running
+        }
+        if (done == -1)
+        {
+            if (errno == ECHILD)
+                break; // no more child processes
+        }
+        else
+        {
+            if (!WIFEXITED(status) || WEXITSTATUS(status) != 0)
+            {
+                std::cerr << "pid " << done << " failed" << std::endl;
+            }
+        }
+    }
+}
+
+void uShell3::finish(const TokenList &_tokenList)
+{
+    // 1. Check if the finish command has parameters
+    if (_tokenList.size() < 2)
+    {
+        std::cerr << "Error: Missing process index for finish command." << std::endl;
+        return;
+    }
+
+    int processIndex;
+    try
+    {
+        // 2. Convert the argument to a process index
+        processIndex = std::stoi(_tokenList[1]);
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << "Error: Invalid process index provided." << std::endl;
+        return;
+    }
+
+    // 3. Validate process index
+    if (processIndex < 0 || processIndex >= static_cast<int>(m_bgProcessList.size()))
+    {
+        std::cerr << "Error: Process index out of range." << std::endl;
+        return;
+    }
+
+    ProcessInfo &pInfo = m_bgProcessList[processIndex];
+
+    // 4. Check if the process is still active
+    if (!pInfo.bActive)
+    {
+        std::cout << "Process Index " << processIndex << " process " << pInfo.PID
+                  << " is no longer a child process." << std::endl;
+        return;
+    }
+
+    // 5. Wait for the process if it's still active
+    int status;
+    pid_t waitedPID = waitpid(pInfo.PID, &status, 0);
+    if (waitedPID == -1)
+    {
+        perror("waitpid");
+        return;
+    }
+
+    // 6. Print the exit status and other details
+    if (WIFEXITED(status))
+    {
+        int exitStatus = WEXITSTATUS(status);
+        std::cout << "process " << pInfo.PID << " exited with exit status " << exitStatus << "." << std::endl;
+    }
+    else if (WIFSIGNALED(status))
+    {
+        int signalNumber = WTERMSIG(status);
+        std::cout << "process " << pInfo.PID << " was killed by signal " << signalNumber << "." << std::endl;
+    }
+
+    // 7. Mark the process as inactive
+    pInfo.bActive = false;
+}
+
+uShell3::uShell3(bool _bFlag) : uShell2(_bFlag)
+{
+    // Set the prompt
+    m_prompt = "uShell";
+    // Set the internal command list
+    m_internalCmdList3["finish"] = &uShell3::finish;
+}
+
+int uShell3::run()
+{
+    // Main loop: continue until the exit flag is set
+    while (!m_exit)
+    {
+        // Print the shell prompt
+        std::cout << m_prompt << ">";
+        // Read user input
+        std::string input;
+        if (getInput(input))
+        {
+            // Tokenize the input into a list of tokens
+            TokenList tokens;
+            tokenize(input, tokens);
+            // Print the verbose version of the input if in verbose mode
+            if (m_verbose)
+                printVerbose(input);
+            // Replace variables in the token list with their values
+            if (!replaceVars(tokens))
+                continue;
+            // Skip empty input lines
+            if (tokens.empty())
+                continue;
+
+            // Check command priority: uShell3 > uShell2 > uShell
+            // First, check for uShell3 internal commands
+            if (m_internalCmdList3.find(tokens[0]) != m_internalCmdList3.end()) 
+                (this->*m_internalCmdList3[tokens[0]])(tokens);
+            // Next, check for uShell2 internal commands            
+            else if (m_internalCmdList2.find(tokens[0]) != m_internalCmdList2.end()) 
+                (this->*m_internalCmdList2[tokens[0]])(tokens);  
+            // Finally, check for uShell internal commands            
+            else if (m_internalCmdList.find(tokens[0]) != m_internalCmdList.end()) 
+                (this->*m_internalCmdList[tokens[0]])(tokens);    
+            // If none of the internal commands match, then execute as external command            
+            else 
+                doExternalCmd(tokens);            
+
+            // Check if the exit flag is set after executing a command
+            if (m_exit)
+                break;
+        }
+        else        
+            break; // Break out of the loop if input retrieval fails        
+    }
+    // Return the exit code when the shell terminates
+    return m_exitCode;
+}

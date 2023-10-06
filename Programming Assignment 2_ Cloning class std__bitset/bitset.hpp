@@ -114,6 +114,21 @@ namespace HLP3
         }
     }
 
+    /*
+    uint32_t set_bit(uint32_t _value, uint32_t _position) 
+    {
+        // Check if position is within the valid range of [0, 31]
+        if (_position > 31) 
+            return _value;
+
+        // Create a mask with the i-th bit set to 1
+        uint32_t bitMask = 1 << _position;
+
+        // Use bitwise OR to set the i-th bit of x to 1
+        return _value | bitMask;
+    }
+    */
+
     /**
      * Resets the bit at the specified position to 0.
      * 

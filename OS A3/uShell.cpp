@@ -199,8 +199,9 @@ void uShell3::doExternalCmd(const TokenList &_tokenList)
     sa.sa_flags = SA_RESTART | SA_NOCLDSTOP;
     sigaction(SIGCHLD, &sa, nullptr);
 
+    TokenList mutableTokens = _tokenList;  // Create a copy
     // 1. Check if the first token is a pipe
-    if (_tokenList[0] == "|")
+    if (mutableTokens[0] == "|")
     {
         std::cerr << "Syntax Error: Unexpected pipe at the start." << std::endl;
         return;
@@ -208,9 +209,9 @@ void uShell3::doExternalCmd(const TokenList &_tokenList)
 
     // 2. Count pipes and gather pipe information
     std::vector<PipeInfo> pipes;
-    for (unsigned i = 0; i < _tokenList.size(); i++)
+    for (unsigned i = 0; i < mutableTokens.size(); i++)
     {
-        if (_tokenList[i] == "|")
+        if (mutableTokens[i] == "|")
         {
             PipeInfo pinfo;
             pinfo.posInToken = i;
@@ -227,7 +228,7 @@ void uShell3::doExternalCmd(const TokenList &_tokenList)
     unsigned start = 0;
     for (unsigned i = 0; i <= pipes.size(); i++)
     {
-        unsigned end = (i < pipes.size()) ? pipes[i].posInToken : _tokenList.size();
+        unsigned end = (i < pipes.size()) ? pipes[i].posInToken : mutableTokens.size();
 
         if (start == end)
         {
@@ -236,7 +237,7 @@ void uShell3::doExternalCmd(const TokenList &_tokenList)
         }
 
         // Check if command exists
-        if (!exist(_tokenList, start, end - 1))
+        if (!exist(mutableTokens, start, end - 1))
         {
             std::cerr << "Command not found." << std::endl;
             return;
@@ -244,11 +245,11 @@ void uShell3::doExternalCmd(const TokenList &_tokenList)
 
          // Check if the last token is "&" for background execution
         bool runInBackground = false;
-        if (!_tokenList.empty() && _tokenList.back() == "&")
+        
+        if (!mutableTokens.empty() && mutableTokens.back() == "&")
         {
             runInBackground = true;
-            // Remove the "&" from the token list
-            _tokenList.pop_back();
+            mutableTokens.pop_back();
         }
 
         // 4. Start creating child processes
@@ -282,19 +283,7 @@ void uShell3::doExternalCmd(const TokenList &_tokenList)
                 close(p.descriptor[PipeInfo::OUT_DESCRIPTOR]);
             }
 
-            // 6. Execute the desired command
-            std::vector<char *> args;
-            for (unsigned j = start; j < end; ++j)
-            {
-                args.push_back(const_cast<char *>(_tokenList[j].c_str()));
-            }
-            args.push_back(nullptr);
-
-            if (execvp(args[0], &args[0]) == -1)
-            {
-                perror("execvp");
-                ::exit(EXIT_FAILURE);
-            }
+            execute(mutableTokens, start, mutableTokens.size());
         }
         else
         { // Parent process
