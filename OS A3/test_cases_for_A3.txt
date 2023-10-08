@@ -25,3 +25,44 @@ ls | grepsas uShell | wc
 ls | grep uShell | wc
 ls | | wc 
 exit
+
+
+
+
+
+
+uShell>ls | sort
+a1.3.pdf
+fork_test.out
+main.cpp
+makefile
+shellmain3.obj
+temp.cpp
+test.cpp
+test_cases_for_A3.txt
+uShell
+uShell.cpp
+uShell.h
+uShell.o
+uShell2.h
+uShell2_ref.obj
+uShell3.h
+uShell_ref
+uShell_ref.obj
+uShell>ls | grep uShell
+uShell
+uShell.cpp
+uShell.h
+uShell.o
+uShell2.h
+uShell2_ref.obj
+uShell3.h
+uShell_ref
+uShell_ref.obj
+uShell>ls | grep uShell | wc
+      9       9      98
+uShell>ls | grepsas uShell | wc
+Error: grepsas cannot be found
+uShell>ls | | wc
+Error: syntax error
+uShell>exit
