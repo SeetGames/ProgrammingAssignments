@@ -1,6 +1,6 @@
 # Compiler settings
 CXX = g++
-CXXFLAGS = -std=c++11 -Wall -g
+CXXFLAGS = -std=c++11 -Werror -Wall -Wextra -pedantic -g
 
 # Object files
 OBJS = uShell.o shellmain3.obj uShell_ref.obj uShell2_ref.obj

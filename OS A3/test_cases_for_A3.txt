@@ -27,17 +27,107 @@ ls | | wc
 exit
 
 
+MINE:
+uShell>ls - & 
+[0] process 2808
+uShell>ls: cannot access '-': No such file or directory
+finish 0 
+process 2808 exited with exit status 2.
+uShell>ls & | grep
+Usage: grep [OPTION]... PATTERNS [FILE]...
+Try 'grep --help' for more information.
+ls: cannot access '&': No such file or directory
+uShell>ls | &
+Error: syntax error
+uShell>ls | /grep txt | /usr/bin/sort | wc
+Error: /grep cannot be found
+      0       0       0
+uShell>ls | /usr/bin/grep txt | sort | wc
+      1       1      22
+uShell>ls | /usr/bin/hee txt | sort | wc
+Error: /usr/bin/hee cannot be found
+      0       0       0
+uShell>grepa | ls | |
+Error: syntax error
+uShell>lista kappa | | koppa haha | lopa | |
+Error: syntax error
+uShell>| ls | what | haha
+uShell>ws | ls
+Seetoh  a1.3.pdf  makefile  shellmain3.obj  test.cpp  test_cases_for_A3.txt  uShell  uShell.cpp  uShell.h  uShell.o  uShell2.h  uShell2_ref.obj  uShell3.h  uShell_ref  uShell_ref.obj
+Error: ws cannot be found
 
 
+JOEY:
+uShell>ls - & 
+[0] process 2775
+uShell>ls: cannot access '-': No such file or directory
+finish 0 
+process 2775 exited with exit status 2
+uShell>ls & | grep
+ls: cannot access '&': No such file or directory
+Usage: grep [OPTION]... PATTERNS [FILE]...
+Try 'grep --help' for more information.
+uShell>ls | &
+[1] process 2778
+Error: & cannot be found
+uShell>ls | /grep txt | /usr/bin/sort | wc
+Error: /grep cannot be found
+uShell>ls | /usr/bin/grep txt | sort | wc
+      1       1      22
+uShell>ls | /usr/bin/hee txt | sort | wc
+Error: /usr/bin/hee cannot be found
+uShell>ls | grep txt | sort | wc
+      1       1      22
+uShell>grepa | ls | |
+Error: syntax error
+uShell>lista kappa | | koppa haha | lopa | |
+Error: syntax error
+uShell>| ls | what | haha
+uShell>ws | ls
+Error: ws cannot be found
+uShell>exit
+Segmentation fault
 
-
+uShell>grep uShell uShell.h & 
+[0] process 2754
+uShell> uShell class. Acts as a command prompt that takes in input and performs
+class uShell
+    typedef void (uShell::*fInternalCmd)(TokenList const &);
+    Creates the class object of uShell
+    uShell(bool bFlag);
+grep uShell uShell.h & 
+[1] process 2755
+uShell> uShell class. Acts as a command prompt that takes in input and performs
+class uShell
+    typedef void (uShell::*fInternalCmd)(TokenList const &);
+    Creates the class object of uShell
+    uShell(bool bFlag);
+finish 0
+process 2754 exited with exit status 0
+uShell>finish 0
+Process Index 0 process 2754 is no longer a child process.
+uShell>grep uShell uShell.h &
+[2] process 2761
+uShell> uShell class. Acts as a command prompt that takes in input and performs
+class uShell
+    typedef void (uShell::*fInternalCmd)(TokenList const &);
+    Creates the class object of uShell
+    uShell(bool bFlag);
+finish 1
+process 2755 exited with exit status 0
+uShell>finish 0
+Process Index 0 process 2754 is no longer a child process.
+uShell>finish 2
+process 2761 exited with exit status 0
+uShell>grep uShell uShell.h&
+grep: uShell.h&: No such file or directory
+uShell>finish 0
+Process Index 0 process 2754 is no longer a child process.
 uShell>ls | sort
+Seetoh
 a1.3.pdf
-fork_test.out
-main.cpp
 makefile
 shellmain3.obj
-temp.cpp
 test.cpp
 test_cases_for_A3.txt
 uShell
@@ -63,6 +153,203 @@ uShell>ls | grep uShell | wc
       9       9      98
 uShell>ls | grepsas uShell | wc
 Error: grepsas cannot be found
+uShell>ls | grep uShell | wc
+      9       9      98
 uShell>ls | | wc
 Error: syntax error
 uShell>exit
+Segmentation fault
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+uShell>finish
+Error: no such process index.
+uShell>grep uShell uShell.h & 
+[0] process 1254
+uShell> uShell class. Acts as a command prompt that takes in input and performs
+class uShell
+    typedef void (uShell::*fInternalCmd)(TokenList const &);
+    Creates the class object of uShell
+    uShell(bool bFlag);
+grep uShell uShell.h & 
+[1] process 1255
+uShell> uShell class. Acts as a command prompt that takes in input and performs
+class uShell
+    typedef void (uShell::*fInternalCmd)(TokenList const &);
+    Creates the class object of uShell
+    uShell(bool bFlag);
+finish 0
+process 1254 exited with exit status 0
+uShell>finish 0
+Process Index 0 process 1254 is no longer a child process.
+uShell>grep uShell uShell.h & 
+[2] process 1256
+uShell> uShell class. Acts as a command prompt that takes in input and performs
+class uShell
+    typedef void (uShell::*fInternalCmd)(TokenList const &);
+    Creates the class object of uShell
+    uShell(bool bFlag);
+finish 1
+process 1255 exited with exit status 0
+uShell>finish 0
+Process Index 0 process 1254 is no longer a child process.
+uShell>finish 2
+process 1256 exited with exit status 0
+uShell>grep uShell uShell.h & 
+[3] process 1257
+uShell> uShell class. Acts as a command prompt that takes in input and performs
+class uShell
+    typedef void (uShell::*fInternalCmd)(TokenList const &);
+    Creates the class object of uShell
+    uShell(bool bFlag);
+finish 0
+Process Index 0 process 1254 is no longer a child process.
+uShell>ls | sort
+a1.3.pdf
+makefile
+shellmain3.obj
+test.cpp
+test_cases_for_A3.txt
+uShell
+uShell.cpp
+uShell.h
+uShell.o
+uShell2.h
+uShell2_ref.obj
+uShell3.h
+uShell_ref
+uShell_ref.obj
+uShell>ls | grep uShell
+uShell
+uShell.cpp
+uShell.h
+uShell.o
+uShell2.h
+uShell2_ref.obj
+uShell3.h
+uShell_ref
+uShell_ref.obj
+uShell>ls | grep uShell | wc
+      9       9      98
+uShell>ls | grepsas uShell | wc
+Error: grepsas cannot be found
+uShell>ls | grep uShell | wc
+      9       9      98
+uShell>ls | | wc 
+Error: syntax error
+uShell>exit
+
+
+uShell_ref output:
+uShell>ls - & 
+[0] process 1280
+uShell>ls: cannot access '-': No such file or directory
+finish 0 
+process 1280 exited with exit status 2
+uShell>ls & | grep
+Usage: grep [OPTION]... PATTERNS [FILE]...
+Try 'grep --help' for more information.
+ls: cannot access '&': No such file or directory
+uShell>ls | &
+Error: & cannot be found
+uShell>ls | /grep txt | /usr/bin/sort | wc
+Error: /grep cannot be found
+uShell>ls | /usr/bin/grep txt | sort | wc
+      1       1      22
+uShell>ls | /usr/bin/hee txt | sort | wc
+Error: /usr/bin/hee cannot be found
+uShell>ls | grep txt | sort | wc
+      1       1      22
+uShell>grepa | ls | |
+Error: grepa cannot be found
+Error: syntax error
+Error: syntax error
+uShell>lista kappa | | koppa haha | lopa | |
+Error: lista cannot be found
+Error: syntax error
+Error: koppa cannot be found
+Error: lopa cannot be found
+Error: syntax error
+Error: syntax error
+uShell>| ls | what | haha
+uShell>ws | ls
+Error: ws cannot be found
+uShell>exit
+
+My output:
+uShell>ls - & 
+ls: cannot access '-': No such file or directory
+ls: cannot access '&': No such file or directory
+uShell>finish 0 
+Error: no such process index.
+uShell>ls & | grep
+Usage: grep [OPTION]... PATTERNS [FILE]...
+Try 'grep --help' for more information.
+ls: cannot access '&': No such file or directory
+uShell>ls | &
+Error: & cannot be found
+uShell>ls | /grep txt | /usr/bin/sort | wc
+Error: /grep cannot be found
+      0       0       0
+uShell>ls | /usr/bin/grep txt | sort | wc
+      1       1      22
+uShell>ls | /usr/bin/hee txt | sort | wc
+Error: /usr/bin/hee cannot be found
+      0       0       0
+uShell>ls | grep txt | sort | wc
+      1       1      22
+uShell>grepa | ls | |
+Error: syntax error
+uShell>lista kappa | | koppa haha | lopa | |
+Error: syntax error
+uShell>| ls | what | haha
+uShell>ws | ls
+a1.3.pdf  makefile  shellmain3.obj  test.cpp  test_cases_for_A3.txt  uShell  uShell.cpp  uShell.h  uShell.o  uShell2.h  uShell2_ref.obj  uShell3.h  uShell_ref  uShell_ref.obj
+Error: ws cannot be found
+uShell>exit
+Segmentation fault
+
+
+uShell>ls - &
+[0] process 1525
+uShell>ls: cannot access '-': No such file or directory
+finish 0 
+process 1525 exited with exit status 2.
+uShell>ls & | grep
+Usage: grep [OPTION]... PATTERNS [FILE]...
+Try 'grep --help' for more information.
+ls: cannot access '&': No such file or directory
+uShell>ls | &
+Error: syntax error
+uShell>ls | /grep txt | /usr/bin/sort | wc
+Error: /grep cannot be found
+      0       0       0
+uShell>ls | /usr/bin/grep txt | sort | wc
+      1       1      22
+uShell>ls | /usr/bin/hee txt | sort | wc
+Error: /usr/bin/hee cannot be found
+      0       0       0
+uShell>ls | grep txt | sort | wc
+      1       1      22
+uShell>grepa | ls | |
+Error: syntax error
+uShell>lista kappa | | koppa haha | lopa | |
+Error: syntax error
+uShell>| ls | what | haha
+uShell>ws | ls
+a1.3.pdf  makefile  shellmain3.obj  test.cpp  test_cases_for_A3.txt  uShell  uShell.cpp  uShell.h  uShell.o  uShell2.h  uShell2_ref.obj  uShell3.h  uShell_ref  uShell_ref.obj
+Error: ws cannot be found
+uShell>exit
+Segmentation fault
