@@ -1,4 +1,16 @@
-
+/*!*****************************************************************************
+ \file polynomial.tpp
+ \author Seetoh Wei Tung
+ \par DP email: seetoh.w@digipen.edu
+ \par Course:  Modern C++ Design Patterns
+ \par Section: B
+ \par Take Home Programming Quiz 5
+ \date 22-10-2023
+ \brief
+    Implements Polynomial class template that represents a polynomial. It takes 
+    a template type parameter specifying the type of coefficients and a
+    non-template type parameter specifying the polynomial's degree.
+*******************************************************************************/
 
 namespace HLP3
 {
@@ -7,7 +19,6 @@ namespace HLP3
    *******************************************************************************/
   template <typename CoefficientType, int Degree>
   Polynomial<CoefficientType, Degree>::Polynomial()
-      : m_Coefficients{new CoefficientType[Degree + 1]}
   {
     // Use for range loop to initialize all the coefficients to 0
     for (auto &element : m_Coefficients)
@@ -26,8 +37,8 @@ namespace HLP3
    * @param _copy
   *******************************************************************************/
   template <typename CoefficientType, int Degree>
-  Polynomial<CoefficientType, Degree>::Polynomial(Polynomial<CoefficientType, Degree> const &_copy)
-      : m_Coefficients{new CoefficientType[Degree + 1]}
+  template <typename CopyCoefficientType>
+  Polynomial<CoefficientType, Degree>::Polynomial(Polynomial<CopyCoefficientType, Degree> const &_copy)
   {
     for (int i = 0; i <= Degree; i++)
     {
@@ -44,11 +55,12 @@ namespace HLP3
    * @return Polynomial<T, N>&
   *******************************************************************************/
   template <typename CoefficientType, int Degree>
-  Polynomial<CoefficientType, Degree> &Polynomial<CoefficientType, Degree>::operator=(Polynomial<CoefficientType, Degree> const &_copy)
+  template <typename RhsCoefficientType>
+  Polynomial<CoefficientType, Degree> &Polynomial<CoefficientType, Degree>::operator=(Polynomial<RhsCoefficientType, Degree> const &_rhs)
   {
     for (int i = 0; i <= Degree; i++)
     {
-      m_Coefficients[i] = _copy[i];
+      m_Coefficients[i] = _rhs[i];
     }
     return *this;
   }
@@ -88,15 +100,36 @@ namespace HLP3
    * @return Polynomial<CoefficientType, Degree>
    *******************************************************************************/
   template <typename CoefficientType, int Degree>
-  Polynomial<CoefficientType, Degree2> Polynomial<CoefficientType, Degree>::operator*(Polynomial<CoefficientType, Degree2> const &_rhs) const
+  template <int RhsDegree>
+  Polynomial<CoefficientType, Degree + RhsDegree> Polynomial<CoefficientType, Degree>::operator*(Polynomial<CoefficientType, RhsDegree> const &_rhs) const
   {
-    Polynomial<CoefficientType, Degree> result;
-    for (int i = 0; i <= Degree; i++)
+    Polynomial<CoefficientType, Degree + RhsDegree> result{};
+    for (int lhsDegree = 0; lhsDegree <= Degree; lhsDegree++)
     {
-      for (int j = 0; j <= Degree; j++)
+      for (int rhsDegree = 0; rhsDegree <= RhsDegree; rhsDegree++)
       {
-        result[i + j] += m_Coefficients[i] * _rhs[j];
+        result[lhsDegree + rhsDegree] += m_Coefficients[lhsDegree] * _rhs[rhsDegree];
       }
+    }
+    return result;
+  }
+
+  /*!*****************************************************************************
+   * @brief Evaluage polynomial at x = a. Evaluate polynomial p(x) using 
+   argument x and return the value.
+   * 
+   * @param _x 
+   * @return CoefficientType 
+  *******************************************************************************/
+  template <typename CoefficientType, int Degree>
+  CoefficientType Polynomial<CoefficientType, Degree>::operator()(CoefficientType const &_x) const
+  {
+    CoefficientType result = 0;
+    CoefficientType xRaisedToExponent = 1;
+    for (int exponent = 0; exponent <= Degree; exponent++)
+    {
+      result += m_Coefficients[exponent] * xRaisedToExponent;
+      xRaisedToExponent *= _x;
     }
     return result;
   }

@@ -1,4 +1,16 @@
-
+/*!*****************************************************************************
+ \file polynomial.h
+ \author Seetoh Wei Tung
+ \par DP email: seetoh.w@digipen.edu
+ \par Course:  Modern C++ Design Patterns
+ \par Section: B
+ \par Take Home Programming Quiz 5
+ \date 22-10-2023
+ \brief
+    Declares interface to Polynomial class template that represents a polynomial.
+    It takes a template type parameter specifying the type of coefficients and a
+    non-template type parameter specifying the polynomial's degree.
+*******************************************************************************/
 
 #ifndef POLYNOMIAL_H
 #define POLYNOMIAL_H
@@ -38,7 +50,8 @@ namespace HLP3
          * 
          * @param _copy 
         *******************************************************************************/
-        Polynomial(Polynomial<CoefficientType, Degree> const& _copy);
+        template <typename CopyCoefficientType>
+        Polynomial(Polynomial<CopyCoefficientType, Degree> const& _copy);
 
         /*!*****************************************************************************
          * @brief Copy assignment operator. Assigns a polynomial to another polynomial.
@@ -48,7 +61,8 @@ namespace HLP3
          * @param _copy
          * @return Polynomial<CoefficientType, Degree>& Copy of the polynomial
         *******************************************************************************/
-        Polynomial<CoefficientType, Degree> &operator=(Polynomial<CoefficientType, Degree> const& _copy);
+        template <typename RhsCoefficientType>
+        Polynomial<CoefficientType, Degree> &operator=(Polynomial<RhsCoefficientType, Degree> const& _rhs);
 
         /*!*****************************************************************************
          * @brief Modifiable operator[]. Returns a reference to the coefficient of the
@@ -71,14 +85,24 @@ namespace HLP3
         /*!*****************************************************************************
          * @brief Given polynomials p(x) and q(x), return p(x)*q(x). Note that this
             function must only allow polynomials with similar coefficient types to be
-            multiplied. 
+            multiplied.
          * 
          * @param _rhs 
          * @return Polynomial<CoefficientType, Degree> 
         *******************************************************************************/
-        Polynomial<CoefficientType, Degree> operator*(Polynomial<CoefficientType, Degree2> const& _rhs) const;
+        template <int RhsDegree>
+        Polynomial<CoefficientType, Degree + RhsDegree> operator*(Polynomial<CoefficientType, RhsDegree> const& _rhs) const;
+
+        /*!*****************************************************************************
+         * @brief Evaluage polynomial at x = a. Evaluate polynomial p(x) using 
+         argument x and return the value.
+         * 
+         * @param _x 
+         * @return CoefficientType 
+        *******************************************************************************/
+        CoefficientType operator()(CoefficientType const& _x) const;
     private:
-        CoefficientType *m_Coefficients;
+        CoefficientType m_Coefficients[Degree + 1];
     };
      // Overload operator<<
     template <typename CoefficientType, int Degree>
