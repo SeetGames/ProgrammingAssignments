@@ -1,0 +1,5 @@
+Do nothing
+after yield() but before thread function returns
+First wait is 1
+back to main
+Second wait is 1

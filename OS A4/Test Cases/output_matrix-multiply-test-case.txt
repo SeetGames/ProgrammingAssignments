@@ -1,0 +1,5 @@
+wait thread 0 
+wait thread 1 
+wait thread 2 
+wait thread 3 
+Correct solution

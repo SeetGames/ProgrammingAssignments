@@ -1,0 +1,2 @@
+Do nothing
+after yield() but before thread function returns

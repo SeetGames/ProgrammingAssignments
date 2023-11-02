@@ -1,0 +1,5 @@
+Thread 1 returns 4
+Thread 2 returns 3
+Thread 3 returns 2
+Thread 4 returns 1
+Thread 5 returns 0

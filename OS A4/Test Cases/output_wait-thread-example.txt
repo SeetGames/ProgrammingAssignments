@@ -1,0 +1,4 @@
+Thread 1 says Hello! 
+waiting thread1 finished
+Thread 2 says Hi! 
+waiting thread2 finished
