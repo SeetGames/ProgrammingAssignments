@@ -1,0 +1,103 @@
+------------------ test2 ------------------
+a: head:  0 | size:  6 | tail:  0 | cap :  6 | {Z Y X W V U}
+testing copy ctor:
+b: head:  0 | size:  6 | tail:  0 | cap :  6 | {Z Y X W V U}
+b: head:  2 | size:  4 | tail:  0 | cap :  6 | {X W V U}
+testing copy assignment operator:
+a: head:  2 | size:  4 | tail:  0 | cap :  6 | {X W V U}
+pushing three values to a:
+a: head:  3 | size:  6 | tail:  3 | cap :  6 | {W V U a b c}
+testing member function swap:
+a: head:  2 | size:  4 | tail:  0 | cap :  6 | {X W V U}
+b: head:  3 | size:  6 | tail:  3 | cap :  6 | {W V U a b c}
+testing full and push member functions to fill a:
+a: head:  2 | size:  6 | tail:  2 | cap :  6 | {X W V U : ;}
+testing non-member function swap:
+a: head:  3 | size:  6 | tail:  3 | cap :  6 | {W V U a b c}
+b: head:  2 | size:  6 | tail:  2 | cap :  6 | {X W V U : ;}
+testing const member functions:
+d: head:  3 | size:  6 | tail:  3 | cap :  6 | {W V U a b c}
+testing empty, front, size, pop member functions: W V U a b c
+a: head:  3 | size:  0 | tail:  3 | cap :  6 | {}
+testing push, front, back member functions: e: head:  0 | size:  1 | tail:  1 | cap :  5 | {a}
+e's front value: a
+e's back value:  a
+e: head:  0 | size:  2 | tail:  2 | cap :  5 | {a b}
+e's front value: a
+e's back value:  b
+e: head:  0 | size:  3 | tail:  3 | cap :  5 | {a b c}
+e's front value: a
+e's back value:  c
+e: head:  0 | size:  4 | tail:  4 | cap :  5 | {a b c d}
+e's front value: a
+e's back value:  d
+e: head:  0 | size:  5 | tail:  0 | cap :  5 | {a b c d e}
+e's front value: a
+e's back value:  e
+e: head:  1 | size:  5 | tail:  1 | cap :  5 | {b c d e f}
+e's front value: b
+e's back value:  f
+e: head:  2 | size:  5 | tail:  2 | cap :  5 | {c d e f g}
+e's front value: c
+e's back value:  g
+e: head:  3 | size:  5 | tail:  3 | cap :  5 | {d e f g h}
+e's front value: d
+e's back value:  h
+e: head:  4 | size:  5 | tail:  4 | cap :  5 | {e f g h i}
+e's front value: e
+e's back value:  i
+e: head:  0 | size:  5 | tail:  0 | cap :  5 | {f g h i j}
+e's front value: f
+e's back value:  j
+e: head:  1 | size:  5 | tail:  1 | cap :  5 | {g h i j k}
+e's front value: g
+e's back value:  k
+e: head:  2 | size:  5 | tail:  2 | cap :  5 | {h i j k l}
+e's front value: h
+e's back value:  l
+e: head:  3 | size:  5 | tail:  3 | cap :  5 | {i j k l m}
+e's front value: i
+e's back value:  m
+e: head:  4 | size:  5 | tail:  4 | cap :  5 | {j k l m n}
+e's front value: j
+e's back value:  n
+e: head:  0 | size:  5 | tail:  0 | cap :  5 | {k l m n o}
+e's front value: k
+e's back value:  o
+e: head:  1 | size:  5 | tail:  1 | cap :  5 | {l m n o p}
+e's front value: l
+e's back value:  p
+e: head:  2 | size:  5 | tail:  2 | cap :  5 | {m n o p q}
+e's front value: m
+e's back value:  q
+e: head:  3 | size:  5 | tail:  3 | cap :  5 | {n o p q r}
+e's front value: n
+e's back value:  r
+e: head:  4 | size:  5 | tail:  4 | cap :  5 | {o p q r s}
+e's front value: o
+e's back value:  s
+e: head:  0 | size:  5 | tail:  0 | cap :  5 | {p q r s t}
+e's front value: p
+e's back value:  t
+e: head:  1 | size:  5 | tail:  1 | cap :  5 | {q r s t u}
+e's front value: q
+e's back value:  u
+e: head:  2 | size:  5 | tail:  2 | cap :  5 | {r s t u v}
+e's front value: r
+e's back value:  v
+e: head:  3 | size:  5 | tail:  3 | cap :  5 | {s t u v w}
+e's front value: s
+e's back value:  w
+e: head:  4 | size:  5 | tail:  4 | cap :  5 | {t u v w x}
+e's front value: t
+e's back value:  x
+e: head:  0 | size:  5 | tail:  0 | cap :  5 | {u v w x y}
+e's front value: u
+e's back value:  y
+e: head:  1 | size:  5 | tail:  1 | cap :  5 | {v w x y z}
+e's front value: v
+e's back value:  z
+testing empty, pop, size member functions: e: head:  2 | size:  4 | tail:  1 | cap :  5 | {w x y z}
+e: head:  3 | size:  3 | tail:  1 | cap :  5 | {x y z}
+e: head:  4 | size:  2 | tail:  1 | cap :  5 | {y z}
+e: head:  0 | size:  1 | tail:  1 | cap :  5 | {z}

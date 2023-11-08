@@ -1,0 +1,13 @@
+{
+    "files.associations": {
+        "xstring": "cpp",
+        "xutility": "cpp",
+        "initializer_list": "cpp",
+        "xmemory": "cpp",
+        "atomic": "cpp",
+        "iterator": "cpp",
+        "memory": "cpp",
+        "type_traits": "cpp",
+        "xtr1common": "cpp"
+    }
+}

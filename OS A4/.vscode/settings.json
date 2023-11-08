@@ -1,5 +1,7 @@
 {
     "files.associations": {
-        "utility": "cpp"
+        "utility": "cpp",
+        "xtree": "cpp",
+        "deque": "cpp"
     }
 }

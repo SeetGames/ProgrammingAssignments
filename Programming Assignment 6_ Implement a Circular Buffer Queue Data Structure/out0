@@ -1,0 +1,11 @@
+------------------ test0 ------------------
+sizeof(Queue): 32
+a: head:  0 | size:  0 | tail:  0 | cap :  4 | {}
+a: head:  0 | size:  1 | tail:  1 | cap :  4 | {1}
+a: head:  0 | size:  2 | tail:  2 | cap :  4 | {1 2}
+a: head:  1 | size:  1 | tail:  2 | cap :  4 | {2}
+a: head:  1 | size:  2 | tail:  3 | cap :  4 | {2 3}
+a: head:  1 | size:  3 | tail:  0 | cap :  4 | {2 3 4}
+a: head:  1 | size:  4 | tail:  1 | cap :  4 | {2 3 4 5}
+a: head:  2 | size:  4 | tail:  2 | cap :  4 | {3 4 5 6}
+a: head:  3 | size:  3 | tail:  2 | cap :  4 | {4 5 6}

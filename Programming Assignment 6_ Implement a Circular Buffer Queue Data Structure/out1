@@ -1,0 +1,16 @@
+------------------ test1 ------------------
+a: head:  0 | size:  0 | tail:  0 | cap :  5 | {}
+a: head:  0 | size:  3 | tail:  3 | cap :  5 | {a b c}
+a: head:  0 | size:  5 | tail:  0 | cap :  5 | {a b c d e}
+a: head:  1 | size:  5 | tail:  1 | cap :  5 | {b c d e f}
+a: head:  2 | size:  4 | tail:  1 | cap :  5 | {c d e f}
+a: head:  2 | size:  5 | tail:  2 | cap :  5 | {c d e f z}
+a: head:  4 | size:  3 | tail:  2 | cap :  5 | {e f z}
+a: head:  0 | size:  2 | tail:  2 | cap :  5 | {f z}
+a: head:  1 | size:  1 | tail:  2 | cap :  5 | {z}
+a: head:  2 | size:  5 | tail:  2 | cap :  5 | {! " # $ %}
+b: head:  0 | size:  6 | tail:  0 | cap :  6 | {a b c d e f}
+a: head:  0 | size:  6 | tail:  0 | cap :  6 | {a b c d e f}
+b: head:  2 | size:  5 | tail:  2 | cap :  5 | {! " # $ %}
+a: head:  2 | size:  5 | tail:  2 | cap :  5 | {! " # $ %}
+b: head:  0 | size:  6 | tail:  0 | cap :  6 | {a b c d e f}
