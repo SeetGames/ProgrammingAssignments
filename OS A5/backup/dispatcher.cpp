@@ -14,20 +14,17 @@
 #include "request.h"
 #include <condition_variable>
 #include <memory>
-#include <iostream>
 using namespace std;
 
-// Global variables for managing the job count, workers, and requests
-mutex Dispatcher::jobCountMutex;   // Mutex for safe access to job count
-int Dispatcher::nJobs = 0;         // Total number of jobs
-mutex Dispatcher::workersMutex;    // Mutex for safe access to worker queue
-queue<Worker*> Dispatcher::workers; // Queue of available workers
-vector<thread*> Dispatcher::threads; // Vector to keep track of all worker threads
-vector<Worker*> Dispatcher::allWorkers; // Vector to manage all workers
-mutex Dispatcher::requestsMutex;   // Mutex for safe access to requests queue
-queue<Request*> Dispatcher::reqs;  // Queue of pending requests
-mutex Dispatcher::outputMutex;     // Mutex for safe access to shared output resources
-static bool check = false;         // Flag to check initialization
+mutex Dispatcher::jobCountMutex;
+int Dispatcher::nJobs = 0;
+mutex Dispatcher::workersMutex;
+queue<Worker *> Dispatcher::workers;
+vector<thread *> Dispatcher::threads;
+vector<Worker *> Dispatcher::allWorkers;
+mutex Dispatcher::requestsMutex;
+queue<Request *> Dispatcher::reqs;
+mutex Dispatcher::outputMutex;
 
 /**
  * @brief Adds the workers into allWorkers. It creates the threads 
@@ -42,29 +39,23 @@ static bool check = false;         // Flag to check initialization
  */
 bool Dispatcher::init(int workers, int jobs)
 {
-    if (check) //check if the dispatcher has been initialized
     {
-        // Locking job count for safe access and updating job count
+        unique_lock<mutex> lock(jobCountMutex);
+        nJobs = jobs;
+    }
+
+    for (int i = 0; i < workers; ++i)
+    {
+        Worker *worker = new Worker();
+        thread *workerThread = new thread(&Worker::run, worker);
+
         {
-            unique_lock<mutex> lock(jobCountMutex);
-            nJobs = jobs;
+            unique_lock<mutex> lockWorkers(workersMutex);
+            Dispatcher::workers.push(worker);
         }
 
-        // Creating and starting worker threads
-        for (int i = 0; i < workers; ++i)
-        {
-            Worker *worker = new Worker();
-            thread *workerThread = new thread(&Worker::run, worker);
-
-            // Adding worker to the workers queue
-            {
-                unique_lock<mutex> lockWorkers(workersMutex);
-                Dispatcher::workers.push(worker);
-            }
-            // Storing thread and worker references for later management
-            threads.push_back(workerThread);
-            allWorkers.push_back(move(worker)); // Ownership transferred to allWorkers
-        }
+        threads.push_back(workerThread);
+        allWorkers.push_back(move(worker)); // Ownership transferred to allWorkers
     }
 
     return true;
@@ -79,24 +70,27 @@ bool Dispatcher::init(int workers, int jobs)
  */
 bool Dispatcher::stop()
 {
-    // Checking if all jobs are completed
     {
         lock_guard<mutex> lock(jobCountMutex);
         if (nJobs > 0)
+        {
             return false; // Not all jobs have been serviced
+        }
     }
-    // Stopping each worker
+
     for (auto &worker : allWorkers)
     {
         worker->stop();
     }
-    // Joining each worker thread to ensure they complete execution
+
     for (auto &th : threads)
     {
         if (th->joinable())
+        {
             th->join();
+        }
     }
-    // Clearing the list of threads and workers
+
     threads.clear();
     allWorkers.clear();
     // Empty the workers queue safely
@@ -122,26 +116,23 @@ bool Dispatcher::stop()
 void Dispatcher::addRequest(Request *req)
 {
     unique_lock<mutex> lockRequests(requestsMutex);
-    if (check)
-    {
-        // If a worker is available, assign the request immediately
-        if (!workers.empty())
-        {
-            unique_lock<mutex> lockWorkers(workersMutex, defer_lock);
-            lockRequests.unlock();
-            lockWorkers.lock();
-             // Getting the first available worker and assigning the request
-            Worker *worker = workers.front();
-            workers.pop();
-            lockWorkers.unlock();
 
-            worker->setRequest(req);
-        }
-        else // If no worker is available, queue the request
-        {
-            reqs.push(req);
-            lockRequests.unlock();
-        }
+    if (!workers.empty())
+    {
+        unique_lock<mutex> lockWorkers(workersMutex, defer_lock);
+        lockRequests.unlock();
+        lockWorkers.lock();
+
+        Worker *worker = workers.front();
+        workers.pop();
+        lockWorkers.unlock();
+
+        worker->setRequest(req);
+    }
+    else
+    {
+        reqs.push(req);
+        lockRequests.unlock();
     }
 }
 
@@ -159,7 +150,7 @@ void Dispatcher::addRequest(Request *req)
 bool Dispatcher::addWorker(Worker *worker)
 {
     unique_lock<mutex> lockReq(requestsMutex);
-    // If there are pending requests, assign one to the worker
+
     if (!reqs.empty())
     {
         Request *req = reqs.front();
@@ -205,5 +196,7 @@ void Dispatcher::decreaseJobs()
 {
     lock_guard<mutex> lock(jobCountMutex);
     if (nJobs > 0)
+    {
         nJobs--;
+    }
 }

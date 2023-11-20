@@ -14,9 +14,6 @@
 #include "request.h"
 #include "dispatcher.h"
 #include "mm.h"
-using namespace std;
-
-static int check = false;
 
 /**
  * @brief Sets the matrix dimension for the input matrices to compute the matrix multiplication. 
@@ -45,7 +42,7 @@ Request::Request(int m, int n, int l,
       out(C), initialized(false) {}
 
 /**
- * @brief Allocate memory for the block matrices a, b and c. 
+ * @brief If it is not initialized, allocate memory for the block matrices a, b and c. 
  * It copies the data from the input matrices A and B to the allocated memory of block matrices.
  * 
  * @param A Pointer to the array of float values for A.
@@ -53,34 +50,34 @@ Request::Request(int m, int n, int l,
  */
 void Request::init(float *A, float *B)
 {
-    if (!check)
+    if (!initialized)
     {
-        // Allocating memory for the local copies of matrices A, B, and the resultant matrix C
-        a = new float[numARows * numAColumns];
-        b = new float[numAColumns * numBColumns];
-        c = new float[numARows * numBColumns](); // Resulting block C with actual sizes
+        int actualARows = std::min(blockSz, numARows - rowABlkIdx * blockSz);
+        int actualBCols = std::min(blockSz, numBColumns - colBBlkIdx * blockSz);
+
+        a = new float[actualARows * numAColumns];
+        b = new float[numAColumns * actualBCols];
+        c = new float[actualARows * actualBCols](); // Resulting block C with actual sizes
 
         // Copy the relevant block from A, considering the actual number of rows
-        for (int i = 0; i < numARows; ++i)
+        for (int i = 0; i < actualARows; ++i)
         {
             for (int j = 0; j < numAColumns; ++j)
             {
-                a[i * numAColumns + j] = A[i * numAColumns + j];
+                a[i * numAColumns + j] = A[(rowABlkIdx * blockSz + i) * numAColumns + j];
             }
         }
 
         // Copy the relevant block from B, considering the actual number of columns
         for (int i = 0; i < numAColumns; ++i)
         {
-            for (int j = 0; j < numBColumns; ++j)
+            for (int j = 0; j < actualBCols; ++j)
             {
-                b[i * numBColumns + j] = B[i * numBColumns + j];
+                b[i * actualBCols + j] = B[i * numBColumns + (colBBlkIdx * blockSz + j)];
             }
         }
 
-        check = true; // Marking the request as initialized
-        process();    // Processing the matrix multiplication
-        finish();     // Merging the result and cleaning up
+        initialized = true;
     }
 }
 
@@ -89,31 +86,35 @@ void Request::init(float *A, float *B)
  */
 void Request::process()
 {
-    // c = a * b, where c is the result, a and b are blocks of matrices A and B
-    compute(c, a, b, numARows, numAColumns, numBColumns);
+    compute(c, a, b, blockSz, numAColumns, blockSz);
 }
 
 /**
  * @brief function merges the partial results at c from block matrix multiplication into 
  * the final result by using outputMutex to synchronize the access to out. It decrements 
  * the job counter nJobs calling Dispatcher::decreaseJobs().
+ * 
  */
 void Request::finish()
 {
-    Dispatcher::lockOutput(); // Locking output for thread safety
+    Dispatcher::lockOutput();
+    int actualARows = std::min(blockSz, numARows - rowABlkIdx * blockSz);
+    int actualBCols = std::min(blockSz, numBColumns - colBBlkIdx * blockSz);
 
     // Merge partial result c into the output matrix out, considering actual block sizes
-    for (int i = 0; i < numARows; ++i)
+    for (int i = 0; i < actualARows; ++i)
     {
-        for (int j = 0; j < numBColumns; ++j)
+        for (int j = 0; j < actualBCols; ++j)
         {
-            out[i * numBColumns + j] = c[i * numBColumns + j];
+            out[(rowABlkIdx * blockSz + i) * numBColumns + (colBBlkIdx * blockSz + j)] += c[i * blockSz + j] / 10;
         }
     }
 
-    Dispatcher::unlockOutput(); // Unlocking output
+    Dispatcher::unlockOutput();
     Dispatcher::decreaseJobs(); // Notify the dispatcher that a job has been completed
-    delete[] a; delete[] b; delete[] c; // Deallocating memory
-    a = b = c = nullptr;                // Resetting pointers to nullz
-    initialized = false;                // Resetting initialization flag
+    delete[] a;
+    delete[] b;
+    delete[] c;
+    a = b = c = nullptr;
+    initialized = false;
 }

@@ -20,6 +20,7 @@ using namespace std;
  * @brief It sets its running state to true and ready state to false for this worker. 
  * It also prepares a unique_lock ulock that will be used in the function of wait_for 
  * of condition variable cv.
+ * 
  */
 Worker::Worker() : ulock(mtx, defer_lock), req(nullptr), running(true), ready(false) {}
 
@@ -31,10 +32,10 @@ Worker::Worker() : ulock(mtx, defer_lock), req(nullptr), running(true), ready(fa
  */
 void Worker::setRequest(Request *request)
 {
-    lock_guard<mutex> lock(mtx); // Locking the mutex for thread safety
-    req = request;              // Assigning the request
-    ready = true;               // Marking the worker as ready to process the request
-    cv.notify_one();            // Notifying potentially waiting threads that the worker is ready
+    lock_guard<mutex> lock(mtx);
+    req = request;
+    ready = true;
+    cv.notify_one();
 }
 
 /**
@@ -44,9 +45,9 @@ void Worker::setRequest(Request *request)
  */
 void Worker::stop()
 {
-    lock_guard<mutex> lock(mtx); // Locking the mutex to safely update state
-    running = false;             // Setting the running flag to false to stop the worker
-    cv.notify_one();             // Notifying in case the worker is waiting on the condition variable
+    lock_guard<mutex> lock(mtx);
+    running = false;
+    cv.notify_one();
 }
 
 /**
@@ -56,7 +57,7 @@ void Worker::stop()
  */
 void Worker::getCondition(condition_variable *&out_cv)
 {
-    out_cv = &cv; // Assigning the address of the condition variable to out_cv
+    out_cv = &cv;
 }
 
 /**
@@ -82,14 +83,13 @@ void Worker::run()
 
         if (ready && req)
         {
-            // If there's a ready request, process it
-            lock.unlock(); // Unlock before processing to allow other threads to work
-            req->process(); // Process the request
-            req->finish();  // Finish processing the request
-
-            lock.lock();    // Re-lock to safely update worker state
-            ready = false;  // Reset ready state
-            req = nullptr;  // Clear the request
+            // Got a request, process it
+            lock.unlock(); // Unlock before long-running operations
+            req->process();
+            req->finish();
+            lock.lock(); // Re-lock to modify the condition
+            ready = false;
+            req = nullptr;
 
             // After finishing the request, the worker should add itself back to the available queue
             lock.unlock();
