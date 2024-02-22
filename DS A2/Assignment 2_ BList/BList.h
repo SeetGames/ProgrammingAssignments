@@ -10,51 +10,58 @@
 */
 class BListException : public std::exception
 {
-  private:
-    int m_ErrCode;             //!< One of E_NO_MEMORY, E_BAD_INDEX, E_DATA_ERROR
-    std::string m_Description; //!< Description of the exception
+private:
+  int m_ErrCode;             //!< One of E_NO_MEMORY, E_BAD_INDEX, E_DATA_ERROR
+  std::string m_Description; //!< Description of the exception
 
-  public:
-    /*!
-      Constructor
+public:
+  /*!
+    Constructor
 
-      \param ErrCode
-        The error code for the exception.
+    \param ErrCode
+      The error code for the exception.
 
-      \param Description
-        The description of the exception.
-    */
-    BListException(int ErrCode, const std::string& Description) :
-    m_ErrCode(ErrCode), m_Description(Description) {};
+    \param Description
+      The description of the exception.
+  */
+  BListException(int ErrCode, const std::string &Description) : m_ErrCode(ErrCode), m_Description(Description){};
 
-    /*!
-      Get the kind of exception
+  /*!
+    Get the kind of exception
 
-      \return
-        One of E_NO_MEMORY, E_BAD_INDEX, E_DATA_ERROR
-    */
-    virtual int code() const {
-      return m_ErrCode;
-    }
+    \return
+      One of E_NO_MEMORY, E_BAD_INDEX, E_DATA_ERROR
+  */
+  virtual int code() const
+  {
+    return m_ErrCode;
+  }
 
-    /*!
-      Get the human-readable text for the exception
+  /*!
+    Get the human-readable text for the exception
 
-      \return
-        The description of the exception
-    */
-    virtual const char *what() const throw() {
-      return m_Description.c_str();
-    }
+    \return
+      The description of the exception
+  */
+  virtual const char *what() const throw()
+  {
+    return m_Description.c_str();
+  }
 
-    /*!
-      Destructor is "implemented" because it needs to be virtual
-    */
-    virtual ~BListException() {
-    }
+  /*!
+    Destructor is "implemented" because it needs to be virtual
+  */
+  virtual ~BListException()
+  {
+  }
 
-    //! The reason for the exception
-    enum BLIST_EXCEPTION {E_NO_MEMORY, E_BAD_INDEX, E_DATA_ERROR};
+  //! The reason for the exception
+  enum BLIST_EXCEPTION
+  {
+    E_NO_MEMORY,
+    E_BAD_INDEX,
+    E_DATA_ERROR
+  };
 };
 
 /*!
@@ -62,10 +69,10 @@ class BListException : public std::exception
 */
 struct BListStats
 {
-    //!< Default constructor
-  BListStats() : NodeSize(0), NodeCount(0), ArraySize(0), ItemCount(0)  {};
+  //!< Default constructor
+  BListStats() : NodeSize(0), NodeCount(0), ArraySize(0), ItemCount(0){};
 
-  /*! 
+  /*!
     Non-default constructor
 
     \param nsize
@@ -81,14 +88,13 @@ struct BListStats
       Number of items in the list
 
   */
-  BListStats(size_t nsize, int ncount, int asize, int count) : 
-  NodeSize(nsize), NodeCount(ncount), ArraySize(asize), ItemCount(count)  {};
+  BListStats(size_t nsize, int ncount, int asize, int count) : NodeSize(nsize), NodeCount(ncount), ArraySize(asize), ItemCount(count){};
 
   size_t NodeSize; //!< Size of a node (via sizeof)
   int NodeCount;   //!< Number of nodes in the list
   int ArraySize;   //!< Max number of items in each node
   int ItemCount;   //!< Number of items in the entire list
-};  
+};
 
 /*!
   The BList class
@@ -96,57 +102,65 @@ struct BListStats
 template <typename T, unsigned Size = 1>
 class BList
 {
- 
-  public:
-    /*!
-      Node struct for the BList
-    */
-    struct BNode
-    {
-      BNode *next;    //!< pointer to next BNode
-      BNode *prev;    //!< pointer to previous BNode
-      int count;      //!< number of items currently in the node
-      T values[Size]; //!< array of items in the node
 
-      //!< Default constructor
-      BNode() : next(0), prev(0), count(0) {}
-    };
+public:
+  /*!
+    Node struct for the BList
+  */
+  struct BNode
+  {
+    BNode *next;    //!< pointer to next BNode
+    BNode *prev;    //!< pointer to previous BNode
+    int count;      //!< number of items currently in the node
+    T values[Size]; //!< array of items in the node
 
-    BList();                            // default constructor
-    BList(const BList &rhs);            // copy constructor
-    ~BList();                           // destructor
-    BList& operator=(const BList &rhs); // assign operator
+    //!< Default constructor
+    BNode() : next(0), prev(0), count(0) {}
+  };
 
-      // arrays will be unsorted, if calling either of these
-    void push_back(const T& value);
-    void push_front(const T& value);
+  BList();                            // default constructor
+  BList(const BList &rhs);            // copy constructor
+  ~BList();                           // destructor
+  BList &operator=(const BList &rhs); // assign operator
 
-      // arrays will be sorted, if calling this
-    void insert(const T& value);
+  // arrays will be unsorted, if calling either of these
+  void push_back(const T &value);
+  void push_front(const T &value);
 
-    void remove(int index);
-    void remove_by_value(const T& value);
+  // arrays will be sorted, if calling this
+  void insert(const T &value);
 
-    int find(const T& value) const;       // returns index, -1 if not found
+  void remove(int index);
+  void remove_by_value(const T &value);
 
-    T& operator[](int index);             // for l-values
-    const T& operator[](int index) const; // for r-values
+  int find(const T &value) const; // returns index, -1 if not found
 
-    size_t size() const;   // total number of items (not nodes)
-    void clear();          // delete all nodes
+  T &operator[](int index);             // for l-values
+  const T &operator[](int index) const; // for r-values
 
-    static size_t nodesize(); // so the allocator knows the size
+  size_t size() const; // total number of items (not nodes)
+  void clear();        // delete all nodes
 
-      // For debugging
-    const BNode *GetHead() const;
-    BListStats GetStats() const;
+  static size_t nodesize(); // so the allocator knows the size
 
-  private:
-    BNode *head_; //!< points to the first node
-    BNode *tail_; //!< points to the last node
+  // For debugging
+  const BNode *GetHead() const;
+  BListStats GetStats() const;
 
-    // Other private data and methods you may need ...
+private:
+  BNode *head_; //!< points to the first node
+  BNode *tail_; //!< points to the last node
 
+  // Other private data and methods you may need ...
+  BListStats listStats_;
+  BNode *AllocateNewNode(const BNode *rhs = nullptr);
+  BNode *FindNodeByIndex(int index) const;
+  void DeleteNode(BNode *node);
+  void IncreaseNodeItemCount(BNode *node);
+  void SplitNode(BNode *node, int index, const T &value);
+  T &RetrieveValueByIndex(int index) const;
+  void InsertValueAtIndex(BNode *node, int index, const T &value);
+  void RemoveValueAtIndex(BNode *node, int index);
 };
 
 #include "BList.cpp"
