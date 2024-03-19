@@ -51,6 +51,22 @@
         "xstddef": "cpp",
         "xstring": "cpp",
         "xtr1common": "cpp",
-        "xutility": "cpp"
+        "xutility": "cpp",
+        "format": "cpp",
+        "list": "cpp",
+        "array": "cpp",
+        "map": "cpp",
+        "queue": "cpp",
+        "xtree": "cpp",
+        "xhash": "cpp",
+        "algorithm": "cpp",
+        "charconv": "cpp",
+        "functional": "cpp",
+        "locale": "cpp",
+        "optional": "cpp",
+        "set": "cpp",
+        "unordered_map": "cpp",
+        "xlocbuf": "cpp",
+        "xlocmes": "cpp"
     }
 }
