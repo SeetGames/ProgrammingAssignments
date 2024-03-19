@@ -8,11 +8,9 @@
 \brief
 This file contains the implementation for the ALGraph
 ***************************************************************************/
-
 #include "ALGraph.h"
 #include <algorithm>
 #include <queue>
-
 
 /**
  * Constructor for the ALGraph class
@@ -38,27 +36,37 @@ ALGraph::~ALGraph(void)
  * @param destination The destination node
  * @param weight The weight of the edge
  */
-void ALGraph::AddDEdge(unsigned source, unsigned destination, unsigned weight)
+void ALGraph::AddDEdge(unsigned _source, unsigned _destination, unsigned _weight)
 {
-  unsigned id = source - 1;
-  AdjacencyInfo info{destination, weight};
-  auto &adj_list = m_AdjacencyList.at(id);
+    // Calculate zero-based index for source to match internal storage
+    unsigned zeroBasedIndex = _source - 1;
 
-  for (auto i = adj_list.begin(); i != adj_list.end(); ++i)
-  {
-    if (info.weight < i->weight)
+    // Create adjacency info for the edge to be added
+    AdjacencyInfo newEdgeInfo{_destination, _weight};
+
+    // Reference to the adjacency list of the source node
+    auto &sourceAdjList = m_AdjacencyList.at(zeroBasedIndex);
+
+    // Iterate through the adjacency list to find the correct position
+    // for the new edge based on weight (and id for tie-breaking)
+    for (auto it = sourceAdjList.begin(); it != sourceAdjList.end(); ++it)
     {
-      adj_list.insert(i, info);
-      return;
+        // If the new edge's weight is less than the current edge's weight,
+        // or they are equal but the new edge's destination id is smaller,
+        // insert the new edge before the current edge.
+        if (newEdgeInfo.weight < it->weight || 
+            (newEdgeInfo.weight == it->weight && newEdgeInfo.id < it->id))
+        {
+            sourceAdjList.insert(it, newEdgeInfo);
+            return; // Exit after inserting to avoid adding the edge twice
+        }
     }
-    else if (info.weight == i->weight && info.id < i->id)
-    {
-      adj_list.insert(i, info);
-      return;
-    }
-  }
-  adj_list.push_back(info);
+
+    // If the new edge does not fit before any existing edge in the list,
+    // add it to the end of the list.
+    sourceAdjList.push_back(newEdgeInfo);
 }
+
 
 /**
  * Add an undirected edge to the graph
@@ -72,100 +80,106 @@ void ALGraph::AddUEdge(unsigned node1, unsigned node2, unsigned weight)
   AddDEdge(node2, node1, weight);
 }
 
-
-std::vector<DijkstraInfo> ALGraph::Dijkstra(unsigned start_node) const
+/**
+ * Perform Dijkstra's algorithm on the graph
+ * @param _startNode The starting node for the algorithm
+ * @return A vector of DijkstraInfo structs, one for each node in the graph
+ */
+std::vector<DijkstraInfo> ALGraph::Dijkstra(unsigned _startNode) const 
 {
-  auto GetAdjList = [=](unsigned i) { return m_AdjacencyList.at(i - 1); };
-  auto comp = [](const GNode *lhs, const GNode *rhs) -> bool { return *lhs < *rhs; };
+    // Lambda function to access adjacency list of a given node, adjusting for 0-based indexing
+    auto GetAdjList = [=](unsigned index) { return m_AdjacencyList.at(index - 1); };
 
-  std::priority_queue<GNode *, std::vector<GNode *>, decltype(comp)> pq(comp);
-  std::vector<DijkstraInfo> result;
-  std::vector<GNode> nodes;
+    // Priority queue comparison function; assumes definition of GNode supports < operator
+    auto comp = [](const GNode* lhs, const GNode* rhs) { return lhs->info.cost < rhs->info.cost; };
 
-  result.reserve(m_AdjacencyList.size());
-  nodes.reserve(m_AdjacencyList.size());
+    // Priority queue to manage nodes by minimum cost, initialized with custom comparator
+    std::priority_queue<GNode*, std::vector<GNode*>, decltype(comp)> pq(comp);
+    
+    // Preallocate memory for result vector to improve performance
+    std::vector<DijkstraInfo> dijkstraResults;
+    dijkstraResults.reserve(m_AdjacencyList.size());
 
-  //initialize all nodes in graph
-  for (unsigned i = 1; i < m_AdjacencyList.size() + 1; ++i)
-  {
-    GNode node;
-    if (i != start_node)
+    // Container to store node states during algorithm execution
+    std::vector<GNode> nodes;
+    nodes.reserve(m_AdjacencyList.size());
+
+    // Initialize nodes with infinite cost and mark the start node
+    for (unsigned i = 0; i < m_AdjacencyList.size(); ++i) 
     {
-      node.m_Evaluated = false;
-      node.info.cost = INF;
+        GNode node;
+        node.m_id = i + 1; // Adjust for 1-based indexing
+        bool isStartNode = (node.m_id == _startNode);
+        node.info.cost = isStartNode ? 0 : INF;
+        node.m_Evaluated = isStartNode;
+        if (isStartNode) node.info.path.push_back(_startNode);
+        nodes.push_back(node);
     }
-    else
+
+    //push all nodes into queue with updated edge costs.
+    const auto &adj_nodes = GetAdjList(_startNode);
+    
+    for (unsigned i = 0; i < adj_nodes.size(); ++i)
     {
-      node.m_Evaluated = true;
-      node.info.cost = 0;
-      node.info.path.push_back(start_node);
+        const auto &info = adj_nodes.at(i);
+        auto &node = nodes[info.id - 1];
+        node.info.cost = info.weight;
+        
+        pq.push(&node);
+        node.info.path.push_back(_startNode);
     }
 
-    node.m_id = i;
-    nodes.push_back(node);
-  }
-
-  //push all nodes into queue with updated edge costs.
-  const auto &adj_nodes = GetAdjList(start_node);
-
-  for (unsigned i = 0; i < adj_nodes.size(); ++i)
-  {
-    const auto &info = adj_nodes.at(i);
-    auto &node = nodes[info.id - 1];
-    node.info.cost = info.weight;
-
-    pq.push(&node);
-    node.info.path.push_back(start_node);
-  }
-
-  //go through the priority queue and evaluate all nodes.
-  while (!pq.empty())
-  {
-    GNode *v = pq.top();
-    pq.pop();
-
-    v->m_Evaluated = true;
-    v->info.path.push_back(v->m_id);
-
-    const auto &adj_list = GetAdjList(v->m_id);
-
-    for (unsigned i = 0; i < adj_list.size(); ++i)
+    // Dijkstra's algorithm execution
+    while (!pq.empty()) 
     {
-      const auto &info = adj_list.at(i);
-      auto &u = nodes.at(info.id - 1);
+        GNode* current = pq.top(); 
+        pq.pop();
+        
+        current->m_Evaluated = true;
+        current->info.path.push_back(current->m_id);
+        
+        const auto &adj_list = GetAdjList(current->m_id);
 
-      unsigned new_cost = info.weight + v->info.cost;
-
-      if (new_cost < u.info.cost)
-      {
-        u.info.cost = new_cost;
-        u.info.path = v->info.path;
-
-        if (!v->m_Evaluated)
-          u.info.path.push_back(v->m_id);
-
-        pq.push(&u);
-      }
+        for (const auto& info : GetAdjList(current->m_id)) 
+        {
+            auto &neighbour = nodes[info.id - 1];
+            unsigned newCost = info.weight + current->info.cost;
+            
+            // Relaxation step: update neighbour's cost and path if a shorter path is found
+            if (newCost < neighbour.info.cost)
+            {
+                neighbour.info.cost = newCost;
+                neighbour.info.path = current->info.path; // Copy path from current to neighbour
+                if (!current->m_Evaluated)
+                  neighbour.info.path.push_back(current->m_id); // Append neighbour's own ID
+                pq.push(&neighbour); // Reinsert neighbour for further consideration
+            }
+        }
     }
-  }
 
-  for (unsigned i = 0; i < nodes.size(); ++i)
-  {
-    result.push_back(nodes.at(i).info);
-  }
-  return result;
+    // Construct result from nodes' Dijkstra information
+    for (unsigned i = 0; i < nodes.size(); ++i)
+    {
+        dijkstraResults.push_back(nodes.at(i).info);
+    }
+
+    return dijkstraResults;
 }
 
 /**
  * Get the adjacency list representation of the graph
  * @return The adjacency list
  */
-ALIST ALGraph::GetAList(void) const
+ALIST ALGraph::GetAList() const
 {
   return m_AdjacencyList;
 }
 
-
+/**
+ * Less than operator for GNode
+ * @param rhs The right-hand side of the comparison
+ * @return True if the left-hand side is less than the right-hand side
+ */
 bool ALGraph::GNode::operator<(const GNode &rhs) const
 {
   return info.cost < rhs.info.cost;
